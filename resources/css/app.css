@@ -162,6 +162,9 @@
     .account-order-detail-actions{align-items:stretch;flex-direction:column}
 }
 
+/* The footer keeps a clean single-column rhythm after its navigation is removed. */
+.site-footer{grid-template-columns:minmax(0,1fr);gap:0}
+
 /* An isolated glass bottle sits directly in the homepage's quiet rose-ivory field. */
 .campaign-hero{display:grid;grid-template-columns:minmax(0,1.14fr) minmax(360px,.86fr);align-items:center;min-height:clamp(670px,calc(100vh - 82px),850px);border-bottom:1px solid var(--line);background:radial-gradient(ellipse 38% 55% at 79% 49%,#f0e2e9 0%,rgba(240,226,233,.58) 48%,transparent 88%),var(--paper)}
 .hero-copy{display:block;min-width:0;min-height:0;margin:0;padding:clamp(86px,8vw,124px) 0 61px 6vw}
@@ -196,3 +199,39 @@
     .hero-product{padding-bottom:0}
     .hero-product img{width:auto;max-width:100%;height:auto;max-height:520px}
 }
+
+/* Shop-only product carousel: generous editorial cards with quiet, tactile controls. */
+.shop-carousel{position:relative;--carousel-gap:26px}
+.shop-carousel-viewport{overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scroll-behavior:smooth;scrollbar-width:none;scroll-snap-type:x mandatory}
+.shop-carousel-viewport::-webkit-scrollbar{display:none}
+.shop-carousel .shop-carousel-track{display:flex;gap:var(--carousel-gap);width:100%;min-width:100%}
+.shop-carousel .product-card{flex:0 0 calc((100% - (var(--carousel-gap) * 2)) / 3);margin-top:0!important;scroll-snap-align:start;scroll-snap-stop:always}
+.shop-carousel .product-media img{aspect-ratio:.82}
+.shop-carousel .empty-state{flex:0 0 100%;width:100%}
+.shop-carousel-control{position:absolute;z-index:3;top:clamp(149px,calc(22vw - 26px),279px);display:grid;width:52px;height:52px;place-items:center;border:1px solid var(--ink);border-radius:50%;color:var(--ink);background:rgba(252,250,245,.95);box-shadow:0 10px 28px rgba(39,31,21,.12);cursor:pointer;transition:color .2s,background .2s,border-color .2s,transform .2s}
+.shop-carousel-control svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.6}
+.shop-carousel-control:hover:not(:disabled){color:var(--paper);border-color:var(--gold-ink);background:var(--gold-ink);transform:scale(1.04)}
+.shop-carousel-control:disabled{opacity:.3;background:var(--ivory)}
+.shop-carousel-previous{left:-26px}
+.shop-carousel-next{right:-26px}
+.shop-carousel-footer{position:relative;display:flex;min-height:48px;align-items:center;justify-content:center;border-top:1px solid var(--line);margin-top:44px;padding-top:20px}
+.shop-carousel-status{position:absolute;left:0;color:var(--taupe);font-size:9px;font-weight:800;letter-spacing:.18em}
+.shop-carousel-pagination{display:flex;align-items:center;justify-content:center;gap:1px}
+.shop-carousel-dot{position:relative;width:30px;height:30px;border:0;padding:0;background:transparent;cursor:pointer}
+.shop-carousel-dot::before{position:absolute;inset:50% auto auto 50%;width:7px;height:7px;border:1px solid var(--taupe);border-radius:50%;content:"";background:transparent;transform:translate(-50%,-50%);transition:background .2s,border-color .2s,transform .2s}
+.shop-carousel-dot:hover::before,.shop-carousel-dot:focus-visible::before{border-color:var(--gold-ink);transform:translate(-50%,-50%) scale(1.35)}
+.shop-carousel-dot.is-current::before{border-color:var(--gold-ink);background:var(--gold-ink)}
+.shop-carousel.is-empty .shop-carousel-control,.shop-carousel.is-empty .shop-carousel-footer{display:none}
+@media(max-width:980px){
+    .shop-carousel .product-card{flex-basis:calc((100% - var(--carousel-gap)) / 2)}
+}
+@media(max-width:640px){
+    .shop-carousel{--carousel-gap:18px}
+    .shop-carousel .product-card{flex-basis:100%}
+    .shop-carousel-control{top:clamp(142px,calc(53vw - 23px),202px);width:46px;height:46px}
+    .shop-carousel-previous{left:-8px}
+    .shop-carousel-next{right:-8px}
+    .shop-carousel-footer{display:grid;grid-template-columns:1fr;gap:3px;justify-items:center;margin-top:33px;padding-top:16px}
+    .shop-carousel-status{position:static;line-height:1}
+}
+@media(prefers-reduced-motion:reduce){.shop-carousel-viewport{scroll-behavior:auto}}

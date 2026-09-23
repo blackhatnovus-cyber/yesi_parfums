@@ -12,6 +12,7 @@ const mobileSearchForm = document.querySelector('#mobileSearchForm');
 const mobileSearchPanel = document.querySelector('#mobileSearchPanel');
 let searchTimer;
 let previousFocus;
+let shopCarouselController;
 
 function escapeHtml(value = '') {
     return String(value).replace(/[&<>'"]/g, (character) => ({
@@ -129,6 +130,7 @@ async function runSearch({ showPanel = true, sourceInput = searchInput, targetPa
         if (productGrid) {
             productGrid.innerHTML = payload.html;
             document.querySelector('#productCount').textContent = payload.count;
+            shopCarouselController?.refresh({ reset: true });
         }
 
         if (liveSection && liveGrid) {
@@ -145,6 +147,139 @@ async function runSearch({ showPanel = true, sourceInput = searchInput, targetPa
         [productGrid, liveGrid].forEach((element) => element?.setAttribute('aria-busy', 'false'));
         productGrid?.classList.remove('is-loading');
     }
+}
+
+function createProductCarousel(root) {
+    const viewport = root?.querySelector('[data-carousel-viewport]');
+    const track = root?.querySelector('#productGrid');
+    const previousButton = root?.querySelector('[data-carousel-previous]');
+    const nextButton = root?.querySelector('[data-carousel-next]');
+    const pagination = root?.querySelector('[data-carousel-pagination]');
+    const status = root?.querySelector('[data-carousel-status]');
+    const announcement = root?.querySelector('[data-carousel-announcement]');
+
+    if (! root || ! viewport || ! track || ! previousButton || ! nextButton || ! pagination) return null;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let pageOffsets = [0];
+    let currentPage = 0;
+    let scrollFrame;
+    let resizeFrame;
+
+    function cardsPerPage() {
+        if (window.matchMedia('(max-width: 640px)').matches) return 1;
+        if (window.matchMedia('(max-width: 980px)').matches) return 2;
+
+        return 3;
+    }
+
+    function formatPageNumber(number) {
+        return String(number).padStart(2, '0');
+    }
+
+    function renderState({ announce = false } = {}) {
+        const pageCount = pageOffsets.length;
+        const hasProducts = track.querySelectorAll('[data-product-card]').length > 0;
+        const hasMultiplePages = hasProducts && pageCount > 1;
+
+        previousButton.disabled = ! hasMultiplePages || currentPage === 0;
+        nextButton.disabled = ! hasMultiplePages || currentPage === pageCount - 1;
+
+        pagination.querySelectorAll('[data-carousel-page]').forEach((dot, index) => {
+            const isCurrent = index === currentPage;
+            dot.classList.toggle('is-current', isCurrent);
+            dot.setAttribute('aria-current', isCurrent ? 'true' : 'false');
+        });
+
+        if (status) status.textContent = `${formatPageNumber(currentPage + 1)} / ${formatPageNumber(pageCount)}`;
+        if (announce && announcement) announcement.textContent = `Page ${currentPage + 1} of ${pageCount}`;
+    }
+
+    function buildPagination() {
+        pagination.replaceChildren();
+
+        pageOffsets.forEach((offset, index) => {
+            const dot = document.createElement('button');
+            dot.className = 'shop-carousel-dot';
+            dot.type = 'button';
+            dot.dataset.carouselPage = String(index);
+            dot.setAttribute('aria-label', `Go to carousel page ${index + 1}`);
+            dot.addEventListener('click', () => goToPage(index));
+            pagination.append(dot);
+        });
+    }
+
+    function nearestPage() {
+        return pageOffsets.reduce((nearest, offset, index) => (
+            Math.abs(viewport.scrollLeft - offset) < Math.abs(viewport.scrollLeft - pageOffsets[nearest]) ? index : nearest
+        ), 0);
+    }
+
+    function updateFromScroll() {
+        window.cancelAnimationFrame(scrollFrame);
+        scrollFrame = window.requestAnimationFrame(() => {
+            const nextPage = nearestPage();
+            if (nextPage !== currentPage) {
+                currentPage = nextPage;
+                renderState();
+            }
+        });
+    }
+
+    function goToPage(pageIndex, { immediate = false } = {}) {
+        currentPage = Math.max(0, Math.min(pageIndex, pageOffsets.length - 1));
+        if (immediate) {
+            const inlineScrollBehavior = viewport.style.scrollBehavior;
+            viewport.style.scrollBehavior = 'auto';
+            viewport.scrollLeft = pageOffsets[currentPage];
+            viewport.style.scrollBehavior = inlineScrollBehavior;
+        } else {
+            viewport.scrollTo({
+                left: pageOffsets[currentPage],
+                behavior: reducedMotion.matches ? 'auto' : 'smooth',
+            });
+        }
+        renderState({ announce: true });
+    }
+
+    function refresh({ reset = false } = {}) {
+        window.requestAnimationFrame(() => {
+            const cards = [...track.querySelectorAll('[data-product-card]')];
+            const isEmpty = cards.length === 0;
+            const visibleCards = cardsPerPage();
+            const maxScroll = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+            const pageCount = Math.max(1, Math.ceil(cards.length / visibleCards));
+
+            root.classList.toggle('is-empty', isEmpty);
+            pageOffsets = Array.from({ length: pageCount }, (_, index) => {
+                const cardIndex = Math.min(index * visibleCards, Math.max(0, cards.length - visibleCards));
+                return Math.min(cards[cardIndex]?.offsetLeft ?? 0, maxScroll);
+            });
+
+            pageOffsets = pageOffsets.filter((offset, index, offsets) => index === 0 || Math.abs(offset - offsets[index - 1]) > 1);
+            if (! pageOffsets.length) pageOffsets = [0];
+
+            buildPagination();
+            goToPage(reset || isEmpty ? 0 : nearestPage(), { immediate: true });
+        });
+    }
+
+    previousButton.addEventListener('click', () => goToPage(currentPage - 1));
+    nextButton.addEventListener('click', () => goToPage(currentPage + 1));
+    viewport.addEventListener('scroll', updateFromScroll, { passive: true });
+    viewport.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        goToPage(currentPage + (event.key === 'ArrowRight' ? 1 : -1));
+    });
+    window.addEventListener('resize', () => {
+        window.cancelAnimationFrame(resizeFrame);
+        resizeFrame = window.requestAnimationFrame(() => refresh());
+    });
+
+    refresh({ reset: true });
+
+    return { refresh };
 }
 
 async function addToCart(button) {
@@ -254,6 +389,7 @@ mobileSearch?.addEventListener('input', () => {
 });
 
 document.querySelector('[data-sort-select]')?.addEventListener('change', () => runSearch({ showPanel: false }));
+shopCarouselController = createProductCarousel(document.querySelector('[data-product-carousel]'));
 document.querySelector('#remember')?.addEventListener('change', (event) => {
     document.querySelector('#rememberStatus').textContent = event.target.checked ? 'Remembered session enabled.' : 'Normal session selected.';
 });

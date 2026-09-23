@@ -94,6 +94,8 @@ php artisan migrate --seed
 
 This creates the storefront and admin tables, ten sample perfume products, the demonstration customer, and the administrator account.
 
+Do not skip `--seed` on a fresh installation. Running only `php artisan migrate` creates empty tables; the shop will show `0 fragrances`. Your previous computer's database is not included in a GitHub download.
+
 ### 6. Make uploaded images public
 
 ```powershell
@@ -207,6 +209,21 @@ php artisan test
 The suite covers authentication, role protection, catalogue filtering, cart and wishlist ownership, checkout and stock changes, admin CRUD operations, status updates, uploads, validation, and contact messages.
 
 ## Troubleshooting
+
+### Shop shows `0 fragrances` after installation
+
+For a new local installation, open a terminal in the project folder and run:
+
+```powershell
+php artisan config:clear
+php artisan migrate --seed
+```
+
+Refresh the Shop page and clear any search text. The seeder creates ten sample perfumes with images included in `public/images`.
+
+If products are still missing, confirm the database settings in `.env` match the database you created in step 4. In Admin > Products, confirm products are active and have not been deleted. The storefront only displays active, non-deleted products.
+
+Seeding resets the `admin` and `issey` demonstration passwords and overwrites matching sample product details. Use it for fresh demonstration installations, not routine updates to a store with existing data. Do not use `migrate:fresh` to fix this issue because it deletes all tables.
 
 ### PowerShell says `npm.ps1 cannot be loaded`
 

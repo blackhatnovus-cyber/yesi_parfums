@@ -111,13 +111,6 @@
             <span class="footer-mark">ISSEY</span>
             <p>Modern perfume studies in weather, memory, wood, and skin.</p>
         </div>
-        <nav aria-label="Footer navigation">
-            <a href="{{ route('home') }}">Home</a>
-            <a href="{{ route('shop') }}">Shop</a>
-            <a href="{{ route('contacts') }}">Contacts</a>
-            <a href="{{ route('wishlist.index') }}">Wishlist</a>
-            <a href="{{ route('cart.index') }}">Cart</a>
-        </nav>
         <p class="course-credit">Designed &amp; developed by Issey A. Cabangon · EDP 3-B · {{ date('Y') }}</p>
     </footer>
 

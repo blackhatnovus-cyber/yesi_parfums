@@ -9,10 +9,7 @@
             <div><span>PRIVATE EDIT / 01</span><p>Return to the collection you kept.</p></div>
         </div>
         <div class="auth-panel">
-            <nav class="breadcrumb" aria-label="Breadcrumb"><a href="{{ route('home') }}">Home</a><span>/</span><span>Login</span></nav>
-            <p class="eyebrow">Private account</p>
             <h1>Welcome back.</h1>
-            <p class="auth-intro">Sign in to keep a database-backed cart and wishlist across your session.</p>
             @if (session('status'))
                 <div class="notice success" role="status">{{ session('status') }}</div>
             @endif

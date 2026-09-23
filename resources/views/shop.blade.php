@@ -27,8 +27,26 @@
     </div>
 
     <section class="shop-products" aria-label="Perfume products">
-        <div class="product-grid" id="productGrid" aria-live="polite" aria-busy="false">
-            @include('partials.product-grid', ['products' => $products, 'wishlistIds' => $wishlistIds])
+        <div class="shop-carousel" data-product-carousel role="region" aria-roledescription="carousel" aria-label="The fragrance collection">
+            <button class="shop-carousel-control shop-carousel-previous" type="button" data-carousel-previous aria-controls="productGrid" aria-label="View previous fragrances" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+            </button>
+
+            <div class="shop-carousel-viewport" data-carousel-viewport tabindex="0" aria-label="Scrollable fragrance products">
+                <div class="product-grid shop-carousel-track" id="productGrid" aria-live="polite" aria-busy="false">
+                    @include('partials.product-grid', ['products' => $products, 'wishlistIds' => $wishlistIds])
+                </div>
+            </div>
+
+            <button class="shop-carousel-control shop-carousel-next" type="button" data-carousel-next aria-controls="productGrid" aria-label="View next fragrances">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+            </button>
+
+            <div class="shop-carousel-footer">
+                <span class="shop-carousel-status" data-carousel-status aria-hidden="true">01 / 01</span>
+                <div class="shop-carousel-pagination" data-carousel-pagination aria-label="Choose a carousel page"></div>
+                <span class="sr-only" data-carousel-announcement aria-live="polite" aria-atomic="true"></span>
+            </div>
         </div>
     </section>
 @endsection

@@ -9,10 +9,7 @@
             <div><span>PRIVATE EDIT / 02</span><p>A place for the scents you love.</p></div>
         </div>
         <div class="auth-panel register-panel">
-            <nav class="breadcrumb" aria-label="Breadcrumb"><a href="{{ route('home') }}">Home</a><span>/</span><span>Create account</span></nav>
-            <p class="eyebrow">New account</p>
             <h1>Create your account</h1>
-            <p class="auth-intro">Save your favourite scents, keep your cart, and make your next visit feel like yours.</p>
 
             @if ($errors->any())
                 <div class="notice register-error-summary" role="alert">Please review the highlighted fields below.</div>
